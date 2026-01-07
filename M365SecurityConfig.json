@@ -1,0 +1,208 @@
+{
+  "configurations": {
+    "general": {
+      "outputPath": "D:\\M365\\AZ PS OP",
+      "logRetentionDays": 30,
+      "enableTranscript": true,
+      "timezone": "UTC",
+      "dateFormat": "yyyyMMdd_HHmmss"
+    },
+    
+    "outOfDetection": {
+      "requiredScopes": [
+        "AuditLog.Read.All",
+        "Directory.Read.All",
+        "Policy.Read.All",
+        "RoleManagement.Read.All",
+        "User.Read.All"
+      ],
+      "lookbackDays": 1,
+      "privilegedRoles": [
+        "Global Administrator",
+        "Privileged Role Administrator",
+        "Security Administrator",
+        "Exchange Administrator",
+        "SharePoint Administrator"
+      ],
+      "suspiciousActivities": {
+        "roleAssignments": true,
+        "conditionalAccess": true,
+        "mfaSettings": true,
+        "securityDefaults": true,
+        "authenticationSettings": true
+      },
+      "pimExclusions": [
+        "Privileged Identity Management"
+      ],
+      "alertThreshold": 10
+    },
+    
+    "mfaHygiene": {
+      "requiredScopes": [
+        "User.Read.All",
+        "Directory.Read.All",
+        "UserAuthenticationMethod.Read.All",
+        "AuditLog.Read.All",
+        "Mail.Send"
+      ],
+      "targetUserTypes": {
+        "managementTitles": [
+          "*Manager*",
+          "*Director*",
+          "*Head*",
+          "*Lead*"
+        ],
+        "adminRoles": [
+          "Global Administrator",
+          "Security Administrator",
+          "Exchange Administrator"
+        ]
+      },
+      "mfaMethods": {
+        "strongMethods": [
+          "#microsoft.graph.microsoftAuthenticatorAuthenticationMethod",
+          "#microsoft.graph.fido2AuthenticationMethod",
+          "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod"
+        ],
+        "minimumStrongMethods": 1
+      },
+      "emailSettings": {
+        "enableEmails": false,
+        "initialSubject": "Action Required: MFA Setup Required",
+        "escalationSubject": "URGENT: MFA Compliance Escalation for {DisplayName}",
+        "mfaSetupUrl": "https://aka.ms/mfasetup",
+        "ccManagerOnEscalation": true,
+        "ccManagerOnInitial": true
+      },
+      "notificationEscalationDays": 7
+    },
+    
+    "groupHygiene": {
+      "requiredScopes": [
+        "Group.Read.All",
+        "Directory.Read.All"
+      ],
+      "groupTypes": {
+        "includeMicrosoft365": true,
+        "includeSecurity": true,
+        "includeMailEnabled": true,
+        "includeDistribution": false
+      },
+      "healthChecks": {
+        "checkOwnerless": true,
+        "checkEmpty": true,
+        "minimumOwners": 1,
+        "minimumMembers": 0
+      },
+      "groupFilter": "groupTypes/any(c:c eq 'unified') or securityEnabled eq true",
+      "consistencyLevel": "eventual"
+    },
+    
+    "scheduling": {
+      "outOfDetection": {
+        "enabled": true,
+        "frequency": "Daily",
+        "time": "08:00",
+        "runDurationHours": 24
+      },
+      "mfaHygiene": {
+        "enabled": true,
+        "frequency": "Weekly",
+        "day": "Monday",
+        "time": "09:00",
+        "sendEmails": false
+      },
+      "groupHygiene": {
+        "enabled": true,
+        "frequency": "Monthly",
+        "day": 1,
+        "time": "10:00"
+      }
+    },
+    
+    "emailNotifications": {
+      "smtpServer": "smtp.office365.com",
+      "port": 587,
+      "useSSL": true,
+      "fromAddress": "security@yourdomain.com",
+      "adminRecipients": [
+        "security.admin@yourdomain.com",
+        "it.team@yourdomain.com"
+      ],
+      "alertTypes": {
+        "suspiciousEvents": true,
+        "mfaCompliance": true,
+        "groupHealth": true
+      },
+      "alertThresholds": {
+        "suspiciousEvents": 1,
+        "nonCompliantUsers": 5,
+        "ownerlessGroups": 3,
+        "emptyGroups": 5
+      }
+    },
+    
+    "logging": {
+      "logLevel": "Information",
+      "enableFileLogging": true,
+      "enableEventLogging": true,
+      "eventLogSource": "M365SecurityScripts",
+      "retainLogsDays": 90,
+      "maxLogSizeMB": 50
+    },
+    
+    "modules": {
+      "requiredModules": [
+        "Microsoft.Graph.Authentication",
+        "Microsoft.Graph.Users",
+        "Microsoft.Graph.Users.Actions",
+        "Microsoft.Graph.Identity.DirectoryManagement",
+        "Microsoft.Graph.Identity.SignIns",
+        "Microsoft.Graph.Groups",
+        "Microsoft.Graph.DirectoryObjects"
+      ],
+      "moduleCachePath": "C:\\Program Files\\WindowsPowerShell\\Modules",
+      "autoUpdateModules": true
+    },
+    
+    "security": {
+      "credentialStorage": "WindowsCredentialManager",
+      "encryptConfigFile": true,
+      "requireAdminElevation": true,
+      "allowedExecutionPolicies": [
+        "RemoteSigned",
+        "Unrestricted"
+      ],
+      "ipWhitelist": [
+        "192.168.1.0/24",
+        "10.0.0.0/8"
+      ]
+    },
+    
+    "reports": {
+      "formats": [
+        "CSV",
+        "JSON",
+        "HTML"
+      ],
+      "generateSummary": true,
+      "sendReportsByEmail": false,
+      "archiveOldReports": true,
+      "archiveAfterDays": 30,
+      "compressArchives": true
+    },
+    
+    "scriptSettings": {
+      "errorActionPreference": "Stop",
+      "maximumRetryCount": 3,
+      "retryDelaySeconds": 30,
+      "timeoutMinutes": 60,
+      "culture": "en-US"
+    }
+  },
+  
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-15",
+  "description": "Configuration for M365 Security Automation Scripts",
+  "author": "Security Team"
+}
